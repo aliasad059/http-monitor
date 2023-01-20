@@ -1,0 +1,7 @@
+python-dotenv
+fastapi
+prometheus_fastapi_instrumentator
+psycopg2-binary
+uvicorn[standard]
+requests
+python-multipart
