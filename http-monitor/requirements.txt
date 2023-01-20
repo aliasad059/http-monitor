@@ -5,3 +5,4 @@ psycopg2-binary
 uvicorn[standard]
 requests
 python-multipart
+PyJWT==1.7.1
