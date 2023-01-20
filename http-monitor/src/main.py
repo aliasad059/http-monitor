@@ -10,12 +10,12 @@ from http_monitor_db import dbManager
 from http_scheduler import HttpScheduler
 from .auth.auth_handler import signJWT, decodeJWT
 from .auth.auth_bearer import JWTBearer
-from config import dbConfig, uvicornConfig
+from config import dbConfig, uvicornConfig, schedulerConfig
 
 
 http_db_manager = dbManager(dbConfig)
 http_monitor_service = httpMonitorService(dbManager=http_db_manager)
-http_scheduler = HttpScheduler(dbManager=http_db_manager)
+http_scheduler = HttpScheduler(dbManager=http_db_manager, schedulerConfig=schedulerConfig)
 
 app = FastAPI()
 Instrumentator().instrument(app).expose(app)
