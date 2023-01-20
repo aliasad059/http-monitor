@@ -1,0 +1,27 @@
+services:
+
+  http_monitor:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    container_name: http_monitor
+    image: http_monitor
+    restart: always
+    ports:
+      - 40000:40000
+    environment:
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=40000
+  
+  http_monitor_db:
+    image: postgres:14-alpine
+    container_name: http_monitor_db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=http_monitor
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5430:5430
