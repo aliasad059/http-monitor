@@ -16,6 +16,7 @@ class dbManager():
         cursor.execute("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL)")
         cursor.execute("CREATE TABLE IF NOT EXISTS urls (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, user_id INTEGER NOT NULL, url VARCHAR(255) NOT NULL, method VARCHAR(255) NOT NULL, threshold INTEGER NOT NULL, FOREIGN KEY (user_id) REFERENCES users(id))")
         cursor.execute("CREATE TABLE IF NOT EXISTS requests (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, url_id INTEGER NOT NULL, status_code INTEGER NOT NULL, FOREIGN KEY (url_id) REFERENCES urls(id))")
+        cursor.execute("CREATE TABLE IF NOT EXISTS alerts (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, url_id INTEGER NOT NULL, FOREIGN KEY (url_id) REFERENCES urls(id))")
         self.psql_client.commit()
 
     def user_exists(self, username):
@@ -41,20 +42,25 @@ class dbManager():
         cursor = self.psql_client.cursor()
         cursor.execute("INSERT INTO urls (user_id, url, method, threshold) VALUES (%s, %s, %s, %s)", (user_id, url, method, threshold))
 
-    def get_urls_count(self, user_id):
+    def get_user_urls_count(self, user_id):
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT COUNT(*) FROM urls WHERE user_id = %s", (user_id,))
         return cursor.fetchone()[0]
     
-    def get_urls(self, user_id):
+    def get_user_urls(self, user_id):
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT * FROM urls WHERE user_id = %s", (user_id,))
         return cursor.fetchall()
     
-    def get_url(self, user_id, url_id):
+    def get_user_url(self, user_id, url_id):
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT * FROM urls WHERE user_id = %s AND url_id = %s", (user_id, url_id))
         return cursor.fetchone()
+
+    def get_urls(self):
+        cursor = self.psql_client.cursor()
+        cursor.execute("SELECT * FROM urls")
+        return cursor.fetchall()
     
     def insert_request(self, url_id, status_code):
         cursor = self.psql_client.cursor()
@@ -69,3 +75,17 @@ class dbManager():
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT COUNT(*) FROM requests WHERE url_id = %s", (url_id,))
         return cursor.fetchone()[0]
+    
+    def create_alert(self, url_id):
+        cursor = self.psql_client.cursor()
+        cursor.execute("INSERT INTO alerts (url_id) VALUES (%s)", (url_id,))
+    
+    def alert_exists_since(self, url_id, minutes):
+        cursor = self.psql_client.cursor()
+        cursor.execute("SELECT * FROM alerts WHERE url_id = %s AND created_at >= NOW() - INTERVAL '%s MINUTES'", (url_id, minutes))
+        return cursor.fetchone() is not None
+    
+    def get_alerts_since(self, user_id, minutes):
+        cursor = self.psql_client.cursor()
+        cursor.execute("SELECT * FROM alerts WHERE url_id IN (SELECT id FROM urls WHERE user_id = %s) AND created_at >= NOW() - INTERVAL '%s MINUTES'", (user_id, minutes))
+        return cursor.fetchall()

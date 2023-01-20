@@ -1,18 +1,21 @@
 import os
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI, Form, Depends
 from prometheus_fastapi_instrumentator import Instrumentator
 from uvicorn.config import LOGGING_CONFIG
 
 from http_monitor_service import httpMonitorService
+from http_monitor_db import dbManager
+from http_scheduler import HttpScheduler
 from .auth.auth_handler import signJWT, decodeJWT
 from .auth.auth_bearer import JWTBearer
+from config import dbConfig, uvicornConfig
 
-load_dotenv()
 
-http_monitor_service = httpMonitorService()
+http_db_manager = dbManager(dbConfig)
+http_monitor_service = httpMonitorService(dbManager=http_db_manager)
+http_scheduler = HttpScheduler(dbManager=http_db_manager)
 
 app = FastAPI()
 Instrumentator().instrument(app).expose(app)
@@ -71,7 +74,7 @@ async def get_alerts(dependencies=[Depends(JWTBearer())]):
 
 def run():
     LOGGING_CONFIG["formatters"]["default"]["fmt"] = "%(asctime)s [%(name)s] %(levelprefix)s %(message)s"
-    uvicorn.run(app, host=os.getenv("UVICORN_HOST"), port=os.getenv("UVICORN_PORT"))
+    uvicorn.run(app, host=uvicornConfig["host"], port=uvicornConfig["port"])
 
 if __name__ == '__main__':
     run()
