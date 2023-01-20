@@ -25,11 +25,11 @@ class httpMonitorService:
             return True
         return False
     
-    def create_url(self, user_id, url, threshold):
+    def create_url(self, user_id, url, method, threshold):
         # create a new url for the authenticated user (at most 20 urls per user)
         if dbManager.get_urls_count(user_id) >= 20:
             return False
-        if dbManager.create_url(user_id, url, threshold):
+        if dbManager.create_url(user_id, url, method, threshold):
             return True
         return False
     
