@@ -19,6 +19,14 @@ class HttpScheduler:
         # check all urls in the database
         for url in self.dbManager.get_urls():
             # check if the url is already in the list
+            url = {
+                "url_id": url[0],
+                "url": url[3],
+                "threshold": url[5],
+                "method": url[4],
+                "created_at": url[1]
+            }
+
             if url["url_id"] not in self.urls:
                 # add the url to the list
                 self.urls.append(url["url_id"])
@@ -32,7 +40,7 @@ class HttpScheduler:
     def check_url(self, url):
         # check the url
         try:
-            response = requests.request(url["method"], url["url"])
+            response = requests.request(url["method"], url["url"], timeout=5)
             status_code = response.status_code
         except:
             status_code = 0
