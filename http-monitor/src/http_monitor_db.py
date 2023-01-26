@@ -5,20 +5,29 @@ class dbManager():
         self.psql_client = psycopg2.connect(
             host=config['db_host'],
             port=config['db_port'],
-            database=config['db_name'],
+            user=config['db_user'],
+            password=config['db_password'],
+            # database=config['db_name'],
         )
+        self.psql_client.autocommit = True
+
+        self.init_db()
         
     def close(self):
         self.psql_client.close()
     
     def init_db(self):
         cursor = self.psql_client.cursor()
+        
+        try:
+            cursor.execute("CREATE DATABASE http_monitor")
+        except psycopg2.errors.DuplicateDatabase:
+            pass
         cursor.execute("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL)")
         cursor.execute("CREATE TABLE IF NOT EXISTS urls (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, user_id INTEGER NOT NULL, url VARCHAR(255) NOT NULL, method VARCHAR(255) NOT NULL, threshold INTEGER NOT NULL, FOREIGN KEY (user_id) REFERENCES users(id))")
         cursor.execute("CREATE TABLE IF NOT EXISTS requests (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, url_id INTEGER NOT NULL, status_code INTEGER NOT NULL, FOREIGN KEY (url_id) REFERENCES urls(id))")
         cursor.execute("CREATE TABLE IF NOT EXISTS alerts (id SERIAL PRIMARY KEY, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, url_id INTEGER NOT NULL, FOREIGN KEY (url_id) REFERENCES urls(id))")
-        self.psql_client.commit()
-
+        
     def user_exists(self, username):
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))

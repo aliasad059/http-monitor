@@ -14,7 +14,7 @@ COPY requirements.txt ${DockerHome}
 WORKDIR ${DockerHome}
 
 # upgrade pip
-RUN pip install --upgrade pip
+RUN pip config --user set global.index-url https://pypi.bardia.tech/api/pypi/pypi-all/simple/ && pip install --upgrade pip
 
 # install requirements
 RUN pip install -r requirements.txt

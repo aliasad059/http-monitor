@@ -8,8 +8,8 @@ from uvicorn.config import LOGGING_CONFIG
 from http_monitor_service import httpMonitorService
 from http_monitor_db import dbManager
 from http_scheduler import HttpScheduler
-from .auth.auth_handler import signJWT, decodeJWT
-from .auth.auth_bearer import JWTBearer
+from src.auth.auth_handler import signJWT, decodeJWT
+from src.auth.auth_bearer import JWTBearer
 from config import dbConfig, uvicornConfig, schedulerConfig
 
 
@@ -74,7 +74,7 @@ async def get_alerts(dependencies=[Depends(JWTBearer())]):
 
 def run():
     LOGGING_CONFIG["formatters"]["default"]["fmt"] = "%(asctime)s [%(name)s] %(levelprefix)s %(message)s"
-    uvicorn.run(app, host=uvicornConfig["host"], port=uvicornConfig["port"])
+    uvicorn.run(app, host=uvicornConfig["server_host"], port=uvicornConfig["server_port"])
 
 if __name__ == '__main__':
     run()

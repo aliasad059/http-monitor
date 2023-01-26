@@ -3,25 +3,34 @@ services:
   http_monitor:
     build:
       context: ..
-      dockerfile: ./Dockerfile
+      dockerfile: deploy/Dockerfile
     container_name: http_monitor
     image: http_monitor
     restart: always
-    ports:
-      - 40000:40000
+    # ports:
+    #   - 40000:40000
     environment:
-      - UVICORN_HOST=0.0.0.0
-      - UVICORN_PORT=40000
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=40000
+      - DB_HOST=0.0.0.0
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=http_monitor
+      - REQUEST_INTERVAL=15 # in seconds
+      - PUSH_ALERT_INTERVAL=15 # in minutes
+      - REFRESH_URLS_INTERVAL=15 # in seconds
+    network_mode: host
   
-  http_monitor_db:
-    image: postgres:14-alpine
-    container_name: http_monitor_db
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=http_monitor
-    volumes:
-      - ./data:/var/lib/postgresql/data
-    ports:
-      - 5430:5430
+  # http_monitor_db:
+  #   image: postgres:14-alpine
+  #   container_name: http_monitor_db
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=http_monitor
+  #   volumes:
+  #     - ../../data:/var/lib/postgresql/data
+  #   command: -p 5430
+  #   network_mode: host
