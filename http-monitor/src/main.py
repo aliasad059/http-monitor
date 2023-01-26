@@ -48,6 +48,8 @@ async def create_user(username: str = Form(...), password: str = Form(...)):
 async def create_url(request: Request, url: str = Form(...), method: str = Form(...), threshold: int = Form(...)):
     # create a new url for the authenticated user (at most 20 urls per user)
     user_id = get_user_id(request)
+    if not user_id:
+        return {"message": "Invalid token"}
     if http_monitor_service.create_url(user_id, url, method, threshold):
         return {"message": "URL created"}
     return {"message": "URL not created"}

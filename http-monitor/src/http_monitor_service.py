@@ -54,9 +54,9 @@ class httpMonitorService:
         if not self.dbManager.url_exists(user_id, url_id):
             return False
         
-        failed_requests_count = self.dbManager.get_failed_requests_count(user_id, url_id)
+        failed_requests_count = self.dbManager.get_failed_requests_count(url_id)
         threshold = self.dbManager.get_user_url(user_id, url_id)[5]
-        total_requests_count = self.dbManager.get_requests_count(user_id, url_id)
+        total_requests_count = self.dbManager.get_requests_count(url_id)
 
         return {
             "failed_requests_count": failed_requests_count,
@@ -67,7 +67,12 @@ class httpMonitorService:
     def get_alerts(self, user_id, minutes=60):
         # get all alerts for the authenticated user
         # check all the urls for the user that have failed requests count >= threshold
-        alerts = self.dbManager.get_alerts_since(user_id, minutes)
-        if len(alerts) == 0:
-            return False
+        
+        alerts = []
+        for a in self.dbManager.get_alerts_since(user_id, minutes):
+            alerts.append({
+                "alert_id": a[0],
+                "created_at": a[1],
+                "url_id": a[2],
+            })
         return alerts
