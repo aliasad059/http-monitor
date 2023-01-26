@@ -35,7 +35,7 @@ class dbManager():
     
     def url_exists(self, user_id, url_id):
         cursor = self.psql_client.cursor()
-        cursor.execute("SELECT * FROM urls WHERE user_id = %s AND url_id = %s", (user_id, url_id))
+        cursor.execute("SELECT * FROM urls WHERE user_id = %s AND id = %s", (user_id, url_id))
         return cursor.fetchone() is not None
     
     def check_password(self, username, password):
@@ -46,10 +46,12 @@ class dbManager():
     def create_user(self, username, password):
         cursor = self.psql_client.cursor()
         cursor.execute("INSERT INTO users (username, password) VALUES (%s, crypt(%s, gen_salt('bf')))", (username, password))
+        return True
     
     def create_url(self, user_id, url, method, threshold):
         cursor = self.psql_client.cursor()
         cursor.execute("INSERT INTO urls (user_id, url, method, threshold) VALUES (%s, %s, %s, %s)", (user_id, url, method, threshold))
+        return True
 
     def get_user_urls_count(self, user_id):
         cursor = self.psql_client.cursor()
@@ -63,7 +65,7 @@ class dbManager():
     
     def get_user_url(self, user_id, url_id):
         cursor = self.psql_client.cursor()
-        cursor.execute("SELECT * FROM urls WHERE user_id = %s AND url_id = %s", (user_id, url_id))
+        cursor.execute("SELECT * FROM urls WHERE user_id = %s AND id = %s", (user_id, url_id))
         return cursor.fetchone()
 
     def get_urls(self):
@@ -74,6 +76,7 @@ class dbManager():
     def insert_request(self, url_id, status_code):
         cursor = self.psql_client.cursor()
         cursor.execute("INSERT INTO requests (url_id, status_code) VALUES (%s, %s)", (url_id, status_code))
+        return True
 
     def get_failed_requests_count(self, url_id):
         cursor = self.psql_client.cursor()
@@ -88,7 +91,8 @@ class dbManager():
     def create_alert(self, url_id):
         cursor = self.psql_client.cursor()
         cursor.execute("INSERT INTO alerts (url_id) VALUES (%s)", (url_id,))
-    
+        return True
+        
     def alert_exists_since(self, url_id, minutes):
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT * FROM alerts WHERE url_id = %s AND created_at >= NOW() - INTERVAL '%s MINUTES'", (url_id, minutes))
