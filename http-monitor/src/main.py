@@ -23,6 +23,8 @@ Instrumentator().instrument(app).expose(app)
 def get_user_id(request: Request):
     token = request.headers.get("Authorization").split(" ")[1]
     decoded_token = decodeJWT(bytes(token, "utf-8"))
+    if not decoded_token:
+        return False
     user_id = http_db_manager.get_user_id(decoded_token["user_id"])
     return user_id
 
@@ -53,6 +55,8 @@ async def create_url(request: Request, url: str = Form(...), method: str = Form(
 @app.get("/api/urls")
 async def get_urls(request: Request):
     user_id = get_user_id(request)
+    if not user_id:
+        return {"message": "Invalid token"}
     urls = http_monitor_service.get_urls(user_id)
     if urls:
         return urls
@@ -62,6 +66,8 @@ async def get_urls(request: Request):
 async def get_url_status(url_id: str, request: Request):
     # get the status of a url for the authenticated user
     user_id = get_user_id(request)
+    if not user_id:
+        return {"message": "Invalid token"}
     url_status = http_monitor_service.get_url_status(user_id, url_id)
     if url_status:
         return url_status
@@ -71,6 +77,8 @@ async def get_url_status(url_id: str, request: Request):
 async def get_alerts(request: Request):
     # get all alerts for the authenticated user
     user_id = get_user_id(request)
+    if not user_id:
+        return {"message": "Invalid token"}
     alerts = http_monitor_service.get_alerts(user_id)
     if alerts:
         return alerts
