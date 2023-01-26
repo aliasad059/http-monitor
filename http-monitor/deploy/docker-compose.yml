@@ -7,8 +7,8 @@ services:
     container_name: http_monitor
     image: http_monitor
     restart: always
-    # ports:
-    #   - 40000:40000
+    ports:
+      - 40000:40000
     environment:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=40000
@@ -23,17 +23,16 @@ services:
       - JWT_SECRET=b'deff1952d59f883ece260e8683fed21ab0ad9a53323eca4f'
       - JWT_ALGORITHM=HS256
       - JWT_EXP= 24 # in hours
-    network_mode: host
   
-  # http_monitor_db:
-  #   image: postgres:14-alpine
-  #   container_name: http_monitor_db
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=http_monitor
-  #   volumes:
-  #     - ../../data:/var/lib/postgresql/data
-  #   command: -p 5430
-  #   network_mode: host
+  http_monitor_db:
+    image: postgres:14-alpine
+    container_name: http_monitor_db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=http_monitor
+    volumes:
+      - ../../data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
