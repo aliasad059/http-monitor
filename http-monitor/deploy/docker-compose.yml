@@ -20,6 +20,9 @@ services:
       - REQUEST_INTERVAL=15 # in seconds
       - PUSH_ALERT_INTERVAL=15 # in minutes
       - REFRESH_URLS_INTERVAL=15 # in seconds
+      - JWT_SECRET=b'deff1952d59f883ece260e8683fed21ab0ad9a53323eca4f'
+      - JWT_ALGORITHM=HS256
+      - JWT_EXP= 24 # in hours
     network_mode: host
   
   # http_monitor_db:

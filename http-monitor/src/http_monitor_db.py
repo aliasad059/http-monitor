@@ -45,7 +45,7 @@ class dbManager():
     
     def create_user(self, username, password):
         cursor = self.psql_client.cursor()
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, crypt(%s, gen_salt))", (username, password))
+        cursor.execute("INSERT INTO users (username, password) VALUES (%s, crypt(%s, gen_salt('bf')))", (username, password))
     
     def create_url(self, user_id, url, method, threshold):
         cursor = self.psql_client.cursor()
@@ -98,3 +98,8 @@ class dbManager():
         cursor = self.psql_client.cursor()
         cursor.execute("SELECT * FROM alerts WHERE url_id IN (SELECT id FROM urls WHERE user_id = %s) AND created_at >= NOW() - INTERVAL '%s MINUTES'", (user_id, minutes))
         return cursor.fetchall()
+
+    def get_user_id(self, username):
+        cursor = self.psql_client.cursor()
+        cursor.execute("SELECT id FROM users WHERE username = %s", (username,))
+        return cursor.fetchone()[0]
